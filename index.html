@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApexTradeBroker</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        apexGreen: '#00C805',
+                        apexRed: '#FF5000',
+                        apexDark: '#000000',
+                        apexCard: '#121417',
+                        apexBorder: '#272A30'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-apexDark text-white font-sans antialiased selection:bg-apexGreen selection:text-black">
+
+    <!-- App Container (Mobile Mockup Wrapper) -->
+    <div class="max-w-md mx-auto min-h-screen bg-apexDark flex flex-col justify-between relative pb-20 shadow-2xl border-x border-apexBorder">
+
+        <!-- Top Header Bar -->
+        <header class="flex justify-between items-center px-5 py-4 border-b border-apexBorder">
+            <button class="w-9 h-9 rounded-full bg-apexCard flex items-center justify-center text-gray-300 hover:text-white transition">
+                <i class="fa-regular fa-user text-sm"></i>
+            </button>
+            <h1 class="text-apexGreen font-bold text-lg tracking-wide">ApexTradeBroker</h1>
+            <button class="w-9 h-9 rounded-full bg-apexCard flex items-center justify-center text-gray-300 hover:text-white transition">
+                <i class="fa-solid fa-magnifying-glass text-sm"></i>
+            </button>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 px-5 py-6 overflow-y-auto">
+
+            <!-- Currency Selector Bar -->
+            <div class="flex justify-between items-center bg-apexCard p-2 rounded-xl mb-6 border border-apexBorder text-xs">
+                <span class="text-gray-400 pl-2">Display Currency:</span>
+                <select id="currencySelector" onchange="updateCurrency()" class="bg-black text-apexGreen font-semibold px-3 py-1 rounded-lg border border-apexBorder focus:outline-none cursor-pointer">
+                    <option value="EUR">EUR (€)</option>
+                    <option value="GBP">GBP (£)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="CAD">CAD ($)</option>
+                    <option value="JMD">JMD (J$)</option>
+                </select>
+            </div>
+
+            <!-- Portfolio Valuation Header -->
+            <div class="mb-6">
+                <div id="portfolioBalance" class="text-4xl font-extrabold tracking-tight mb-1">€11,032.61</div>
+                <div class="text-apexGreen text-sm font-semibold flex items-center gap-1">
+                    <span id="portfolioChange">+€99.29 (+0.91%)</span> 
+                    <span class="text-gray-400 font-normal">Today</span>
+                </div>
+            </div>
+
+            <!-- Interactive Chart Tabs -->
+            <div class="flex gap-2 mb-6">
+                <button onclick="setChartTimeframe('1D')" id="btn-1D" class="flex-1 py-1.5 rounded-lg bg-apexGreen text-black font-bold text-xs transition">1D</button>
+                <button onclick="setChartTimeframe('1W')" id="btn-1W" class="flex-1 py-1.5 rounded-lg bg-apexCard text-gray-400 font-medium text-xs hover:text-white transition">1W</button>
+                <button onclick="setChartTimeframe('1M')" id="btn-1M" class="flex-1 py-1.5 rounded-lg bg-apexCard text-gray-400 font-medium text-xs hover:text-white transition">1M</button>
+                <button onclick="setChartTimeframe('3M')" id="btn-3M" class="flex-1 py-1.5 rounded-lg bg-apexCard text-gray-400 font-medium text-xs hover:text-white transition">3M</button>
+                <button onclick="setChartTimeframe('1Y')" id="btn-1Y" class="flex-1 py-1.5 rounded-lg bg-apexCard text-gray-400 font-medium text-xs hover:text-white transition">1Y</button>
+                <button onclick="setChartTimeframe('ALL')" id="btn-ALL" class="flex-1 py-1.5 rounded-lg bg-apexCard text-gray-400 font-medium text-xs hover:text-white transition">ALL</button>
+            </div>
+
+            <!-- Mock SVG Line Chart -->
+            <div class="bg-apexCard p-4 rounded-2xl border border-apexBorder mb-6">
+                <div class="h-36 w-full flex items-end">
+                    <svg viewBox="0 0 300 100" class="w-full h-full overflow-visible">
+                        <path id="chartPath" d="M 0 50 Q 50 20, 100 70 T 200 40 T 300 10" fill="none" stroke="#00C805" stroke-width="2.5" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Quick Action Buttons (Send, Receive, Swap, Deposit) -->
+            <div class="grid grid-cols-4 gap-3 mb-8">
+                <button onclick="openModal('Send')" class="flex flex-col items-center justify-center p-3 rounded-xl bg-apexCard border border-apexBorder hover:border-apexGreen transition group">
+                    <i class="fa-solid fa-arrow-up text-apexGreen mb-1.5 group-hover:scale-110 transition"></i>
+                    <span class="text-xs text-gray-300">Send</span>
+                </button>
+                <button onclick="openModal('Receive')" class="flex flex-col items-center justify-center p-3 rounded-xl bg-apexCard border border-apexBorder hover:border-apexGreen transition group">
+                    <i class="fa-solid fa-arrow-down text-apexGreen mb-1.5 group-hover:scale-110 transition"></i>
+                    <span class="text-xs text-gray-300">Receive</span>
+                </button>
+                <button onclick="openModal('Swap')" class="flex flex-col items-center justify-center p-3 rounded-xl bg-apexCard border border-apexBorder hover:border-apexGreen transition group">
+                    <i class="fa-solid fa-right-left text-apexGreen mb-1.5 group-hover:scale-110 transition"></i>
+                    <span class="text-xs text-gray-300">Swap</span>
+                </button>
+                <button onclick="openModal('Deposit')" class="flex flex-col items-center justify-center p-3 rounded-xl bg-apexCard border border-apexBorder hover:border-apexGreen transition group">
+                    <i class="fa-solid fa-wallet text-apexGreen mb-1.5 group-hover:scale-110 transition"></i>
+                    <span class="text-xs text-gray-300">Deposit</span>
+                </button>
+            </div>
+
+            <!-- Crypto & Stocks Watchlist -->
+            <div class="mb-6">
+                <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Crypto & Assets</h2>
+                <div class="space-y-3" id="assetList">
+                    <!-- Dynamic Asset Items -->
+                    <div class="flex justify-between items-center p-3 rounded-xl bg-apexCard border border-apexBorder hover:border-gray-600 transition cursor-pointer">
+                        <div>
+                            <div class="font-bold text-sm">Bitcoin (BTC)</div>
+                            <div class="text-xs text-gray-400">0.45 BTC</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-sm asset-price" data-eur="28450.00">€28,450.00</div>
+                            <div class="text-xs text-apexGreen font-semibold">+2.45%</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center p-3 rounded-xl bg-apexCard border border-apexBorder hover:border-gray-600 transition cursor-pointer">
+                        <div>
+                            <div class="font-bold text-sm">Ethereum (ETH)</div>
+                            <div class="text-xs text-gray-400">2.80 ETH</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-sm asset-price" data-eur="1820.50">€1,820.50</div>
+                            <div class="text-xs text-apexRed font-semibold">-1.12%</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center p-3 rounded-xl bg-apexCard border border-apexBorder hover:border-gray-600 transition cursor-pointer">
+                        <div>
+                            <div class="font-bold text-sm">Solana (SOL)</div>
+                            <div class="text-xs text-gray-400">14.5 SOL</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-sm asset-price" data-eur="145.20">€145.20</div>
+                            <div class="text-xs text-apexGreen font-semibold">+5.80%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="absolute bottom-0 left-0 right-0 bg-apexCard border-t border-apexBorder px-4 py-3 flex justify-around items-center z-10">
+            <button class="flex flex-col items-center text-apexGreen">
+                <i class="fa-solid fa-house text-base"></i>
+                <span class="text-[10px] mt-1 font-medium">Investing</span>
+            </button>
+            <button class="flex flex-col items-center text-gray-400 hover:text-white transition">
+                <i class="fa-solid fa-magnifying-glass text-base"></i>
+                <span class="text-[10px] mt-1 font-medium">Search</span>
+            </button>
+            <button class="flex flex-col items-center text-gray-400 hover:text-white transition">
+                <i class="fa-solid fa-compass text-base"></i>
+                <span class="text-[10px] mt-1 font-medium">Discover</span>
+            </button>
+            <button class="flex flex-col items-center text-gray-400 hover:text-white transition">
+                <i class="fa-regular fa-newspaper text-base"></i>
+                <span class="text-[10px] mt-1 font-medium">News</span>
+            </button>
+            <button class="flex flex-col items-center text-gray-400 hover:text-white transition">
+                <i class="fa-regular fa-user text-base"></i>
+                <span class="text-[10px] mt-1 font-medium">Account</span>
+            </button>
+        </nav>
+
+        <!-- Interactive Modal Drawer -->
+        <div id="actionModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-end justify-center z-50">
+            <div class="bg-apexCard w-full max-w-md rounded-t-3xl p-6 border-t border-apexBorder animate-slide-up">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 id="modalTitle" class="text-lg font-bold">Action</h3>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+                <div id="modalBody" class="space-y-4">
+                    <!-- Dynamic Modal Content inserted via JS -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Currency conversion rates relative to EUR (€)
+        const rates = {
+            EUR: { symbol: '€', rate: 1.0 },
+            GBP: { symbol: '£', rate: 0.85 },
+            USD: { symbol: '$', rate: 1.08 },
+            CAD: { symbol: 'CAD $', rate: 1.47 },
+            JMD: { symbol: 'J$', rate: 173.71 }
+        };
+
+        let currentBaseCurrency = 'EUR';
+        let basePortfolioEUR = 11032.61;
+        let baseChangeEUR = 99.29;
+
+        function updateCurrency() {
+            const selector = document.getElementById('currencySelector');
+            currentBaseCurrency = selector.value;
+            const curr = rates[currentBaseCurrency];
+
+            // Update main portfolio
+            const convertedBalance = (basePortfolioEUR * curr.rate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const convertedChange = (baseChangeEUR * curr.rate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            
+            document.getElementById('portfolioBalance').innerText = `${curr.symbol}${convertedBalance}`;
+            document.getElementById('portfolioChange').innerText = `+${curr.symbol}${convertedChange} (+0.91%)`;
+
+            // Update asset list prices
+            document.querySelectorAll('.asset-price').forEach(el => {
+                const eurPrice = parseFloat(el.getAttribute('data-eur'));
+                const convertedPrice = (eurPrice * curr.rate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                el.innerText = `${curr.symbol}${convertedPrice}`;
+            });
+        }
+
+        function setChartTimeframe(tf) {
+            ['1D', '1W', '1M', '3M', '1Y', 'ALL'].forEach(t => {
+                const btn = document.getElementById(`btn-${t}`);
+                if (t === tf) {
+                    btn.className = "flex-1 py-1.5 rounded-lg bg-apexGreen text-black font-bold text-xs transition";
+                } else {
+                    btn.className = "flex-1 py-1.5 rounded-lg bg-apexCard text-gray-400 font-medium text-xs hover:text-white transition";
+                }
+            });
+        }
+
+        function openModal(action) {
+            const modal = document.getElementById('actionModal');
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalBody');
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            title.innerText = `${action} Assets`;
+
+            if (action === 'Receive') {
+                body.innerHTML = `
+                    <div class="text-center py-4">
+                        <div class="bg-white p-4 inline-block rounded-xl mb-3">
+                            <i class="fa-solid fa-qrcode text-6xl text-black"></i>
+                        </div>
+                        <p class="text-xs text-gray-400 mb-4">Scan QR code to receive funds securely into ApexTradeBroker.</p>
+                        <div class="bg-black p-3 rounded-xl border border-apexBorder text-xs text-gray-300 truncate select-all">0x71C...392aF</div>
+                    </div>
+                `;
+            } else {
+                body.innerHTML = `
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Amount (${rates[currentBaseCurrency].symbol})</label>
+                        <input type="number" placeholder="0.00" class="w-full bg-black border border-apexBorder rounded-xl p-3 text-white focus:outline-none focus:border-apexGreen">
+                    </div>
+                    <button onclick="alert('Transaction processed in Sandbox Mode.'); closeModal();" class="w-full bg-apexGreen text-black font-bold py-3 rounded-xl mt-2 hover:opacity-90 transition">Confirm ${action}</button>
+                `;
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('actionModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    </script>
+</body>
+</html>
